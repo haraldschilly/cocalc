@@ -2455,15 +2455,32 @@ export function sanitize_html_attributes($, node): void {
     const attrName = this.name;
     // @ts-ignore -- no implicit this
     const attrValue = this.value;
+
+    const lowerName = attrName?.toLowerCase();
+
     // remove attribute name start with "on", possible
     // unsafe, e.g.: onload, onerror...
+    if (lowerName?.indexOf("on") === 0) {
+      $(node).removeAttr(attrName);
+      return;
+    }
+
     // remove attribute value start with "javascript:" pseudo
     // protocol, possible unsafe, e.g. href="javascript:alert(1)"
-    if (
-      attrName?.indexOf("on") === 0 ||
-      attrValue?.indexOf("javascript:") === 0
-    ) {
-      $(node).removeAttr(attrName);
+    if (attrValue) {
+      // Strip control characters and whitespace (from anywhere, to be safe, or just beginning?)
+      // Browsers ignore whitespace and control chars in protocols.
+      // Replacing all whitespace/control chars is safer for the check.
+      // But we should be careful not to be too aggressive if it's not a protocol attribute?
+      // But "javascript:" check assumes it is a protocol.
+      // Let's just strip them for the CHECK.
+      const normalized = attrValue.replace(/[\s\x00-\x1f]+/g, "").toLowerCase();
+      if (
+        normalized.indexOf("javascript:") === 0 ||
+        normalized.indexOf("vbscript:") === 0
+      ) {
+        $(node).removeAttr(attrName);
+      }
     }
   });
 }
