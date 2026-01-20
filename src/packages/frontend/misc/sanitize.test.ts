@@ -52,11 +52,15 @@ describe("sanitize_html_safe", () => {
   });
 
   it("removes javascript: with encoded characters", () => {
-      // This is harder to test with simple string match if the parser decodes it.
-      // But let's see.
+      // The browser/parser decodes entities before our sanitization check if we are using a DOM parser.
+      // However, sanitize_html uses jquery.parseHTML.
+      // Let's ensure the output is safe.
       const input = "<a href='&#106;avascript:alert(1)'>Click me</a>";
       const output = sanitize_html_safe(input);
-      // If sanitized, it shouldn't contain the executable part or should strip the attribute.
-      // But simple string check might fail if it just passes through.
+      // We expect the href to be removed or the protocol to be broken.
+      // If the parser decodes it, our new logic should catch it (stripped of non-alphanumeric/control).
+      // If it doesn't decode it, it's not a valid protocol for the browser either (usually).
+      expect(output).not.toContain("&#106;avascript:");
+      expect(output).not.toContain("javascript:");
   });
 });
