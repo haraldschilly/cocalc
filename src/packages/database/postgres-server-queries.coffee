@@ -101,6 +101,11 @@ exports.extend_PostgreSQL = (ext) -> class PostgreSQL extends ext
                                   # containment, e.g., {account_id:'...'}, only returns
                                   # entries whose value has the given account_id.
             cb    : required
+
+        if opts.log not in ['central_log', 'client_error_log']
+            opts.cb?("invalid log table: #{opts.log}")
+            return
+
         @_query
             query  : "SELECT * FROM #{opts.log}"
             where  :
