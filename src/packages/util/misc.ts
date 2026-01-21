@@ -2459,9 +2459,10 @@ export function sanitize_html_attributes($, node): void {
     // unsafe, e.g.: onload, onerror...
     // remove attribute value start with "javascript:" pseudo
     // protocol, possible unsafe, e.g. href="javascript:alert(1)"
+    // See https://owasp.org/www-community/xss-filter-evasion-cheatsheet
     if (
-      attrName?.indexOf("on") === 0 ||
-      attrValue?.indexOf("javascript:") === 0
+      attrName?.toLowerCase().indexOf("on") === 0 ||
+      attrValue?.toLowerCase().replace(/[\s\t\n\r]/g, "").indexOf("javascript:") === 0
     ) {
       $(node).removeAttr(attrName);
     }
