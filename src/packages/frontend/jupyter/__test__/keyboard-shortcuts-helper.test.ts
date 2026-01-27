@@ -1,19 +1,5 @@
 
-import { get_key_display_string } from "../keyboard-utils";
-
-const SYMBOLS = {
-  meta: "⌘",
-  ctrl: "⌃",
-  alt: "⌥",
-  shift: "⇧",
-  return: "⏎",
-  space: "⌴",
-  tab: "↹",
-  down: "⬇",
-  up: "⬆",
-  backspace: "⌫",
-  delete: "DEL",
-};
+import { get_key_display_string, SYMBOLS } from "../keyboard-utils";
 
 describe("get_key_display_string", () => {
   it("converts special keys to symbols", () => {
