@@ -295,6 +295,8 @@ export function endswith(s: any, t: any): boolean {
 }
 
 import { v4 as v4uuid } from "uuid";
+import { createIntl, createIntlCache } from "react-intl";
+
 export const uuid: () => string = v4uuid;
 
 const uuid_regexp = new RegExp(
@@ -1802,10 +1804,13 @@ export function stripeDate(d: number): string {
   });
 }
 
+const intl = createIntl({ locale: "en-US", messages: {} }, createIntlCache());
+
 export function to_money(n: number, d = 2): string {
-  // see http://stackoverflow.com/questions/149055/how-can-i-format-numbers-as-money-in-javascript
-  // TODO: replace by using react-intl...
-  return n.toFixed(d).replace(/(\d)(?=(\d{3})+\.)/g, "$1,");
+  return intl.formatNumber(n, {
+    minimumFractionDigits: d,
+    maximumFractionDigits: d,
+  });
 }
 
 // numbers with commas -- https://stackoverflow.com/questions/2901102/how-to-format-a-number-with-commas-as-thousands-separators
