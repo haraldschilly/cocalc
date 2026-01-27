@@ -34,22 +34,8 @@ import {
   KeyboardCommand,
   commands as create_commands,
 } from "./commands";
-import { evt_to_obj, keyCode_to_chr } from "./keyboard";
-
-// See http://xahlee.info/comp/unicode_computing_symbols.html
-const SYMBOLS = {
-  meta: "⌘",
-  ctrl: "⌃",
-  alt: "⌥",
-  shift: "⇧",
-  return: "⏎",
-  space: "⌴",
-  tab: "↹",
-  down: "⬇",
-  up: "⬆",
-  backspace: "⌫",
-  delete: "DEL",
-};
+import { evt_to_obj } from "./keyboard";
+import { get_key_display_string, SYMBOLS } from "./keyboard-utils";
 
 export function shortcut_to_string(shortcut: KeyboardCommand): string {
   const v: string[] = [];
@@ -68,35 +54,11 @@ export function shortcut_to_string(shortcut: KeyboardCommand): string {
   if (shortcut.key) {
     v.push(shortcut.key);
   } else {
-    // TODO: using which is buggy/horrible/confusing/deprecated!
-    // we should get rid of this...
+    // We fall back to 'which' for legacy shortcuts that don't have 'key' defined.
+    // Ideally all shortcuts should be migrated to use 'key'.
     const keyCode = shortcut.which;
     if (keyCode != null) {
-      switch (keyCode) {
-        case 8:
-          v.push(SYMBOLS.backspace);
-          break;
-        case 13:
-          v.push(SYMBOLS.return);
-          break;
-        case 32:
-          v.push(SYMBOLS.space);
-          break;
-        case 27:
-          v.push("Esc");
-          break;
-        case 40:
-          v.push(SYMBOLS.down);
-          break;
-        case 38:
-          v.push(SYMBOLS.up);
-          break;
-        case 46:
-          v.push(SYMBOLS.delete);
-          break;
-        default:
-          v.push(keyCode_to_chr(keyCode));
-      }
+      v.push(get_key_display_string(keyCode));
     }
   }
   let s = v.join(" ");
@@ -196,7 +158,7 @@ const Shortcuts: React.FC<ShortcutsProps> = React.memo(
 
     function key_down(e: any): void {
       if (!e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey) {
-        if (e.which === 27) {
+        if (e.key === "Escape") {
           cancel_edit();
           return;
         }
