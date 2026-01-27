@@ -16,7 +16,7 @@ export const SYMBOLS = {
   up: "⬆",
   backspace: "⌫",
   delete: "DEL",
-};
+} as const;
 
 export function get_key_display_string(keyCode: number): string {
   switch (keyCode) {
