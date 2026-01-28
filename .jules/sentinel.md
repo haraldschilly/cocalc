@@ -1,0 +1,4 @@
+## 2025-02-12 - Incomplete HTML Attribute Sanitization in Utility Package
+**Vulnerability:** `sanitize_html_attributes` in `src/packages/util/misc.ts` failed to normalize attribute names and values before checking against blocklists. It missed mixed-case events (e.g. `ONLOAD`) and `javascript:` protocols obfuscated with whitespace or control characters.
+**Learning:** Reliance on simple string matching without normalization (lowercasing, trimming) is insufficient for security checks, especially when dealing with HTML attributes which can be case-insensitive or tolerant of whitespace.
+**Prevention:** Always normalize input (lowercase, strip whitespace/control chars) before comparing against security blocklists. Use dedicated security libraries for HTML sanitization instead of ad-hoc regex/string checks when possible.
