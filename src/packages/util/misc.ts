@@ -2455,13 +2455,20 @@ export function sanitize_html_attributes($, node): void {
     const attrName = this.name;
     // @ts-ignore -- no implicit this
     const attrValue = this.value;
+
+    // Normalize checks
+    const lowerName = attrName?.toLowerCase() || "";
+    // Remove whitespace and control characters (ASCII 0-31) from value for checking
+    const normalizedValue =
+      attrValue?.replace(/[\s\x00-\x1F]/g, "").toLowerCase() || "";
+
     // remove attribute name start with "on", possible
     // unsafe, e.g.: onload, onerror...
     // remove attribute value start with "javascript:" pseudo
     // protocol, possible unsafe, e.g. href="javascript:alert(1)"
     if (
-      attrName?.indexOf("on") === 0 ||
-      attrValue?.indexOf("javascript:") === 0
+      lowerName.indexOf("on") === 0 ||
+      normalizedValue.indexOf("javascript:") === 0
     ) {
       $(node).removeAttr(attrName);
     }
