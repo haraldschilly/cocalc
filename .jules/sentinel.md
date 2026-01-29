@@ -1,0 +1,4 @@
+## 2025-02-18 - Weak Custom HTML Sanitization
+**Vulnerability:** The `sanitize_html_attributes` function in `src/packages/util/misc.ts` relied on simple, case-sensitive `indexOf` checks to block dangerous attributes (`on*`) and protocols (`javascript:`). This allowed bypasses via capitalization (`ONLOAD`), whitespace (`java script:`), and control characters (`javascript\n:`).
+**Learning:** Custom sanitization logic using blacklists is prone to failure because it often misses normalization steps (lowercasing, stripping invisible characters) that browsers perform before executing code.
+**Prevention:** Always normalize input (canonicalization) before applying blacklist checks. Better yet, use established, battle-tested sanitization libraries (like `dompurify` or `sanitize-html`) instead of writing custom helpers.
