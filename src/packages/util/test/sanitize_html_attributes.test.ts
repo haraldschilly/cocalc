@@ -16,9 +16,17 @@ describe("sanitize_html_attributes", () => {
   // Cast to any to add the static 'each' method
   ($ as any).each = (collection: any, callback: Function) => {
     if (!collection) return;
-    // Iterate over a copy to allow modification during iteration
-    [...collection].forEach((item) => callback.call(item));
+    // Iterate using index and checking length dynamically,
+    // mimicking behavior on live collections without snapshotting.
+    // This ensures that if the code doesn't snapshot (e.g. using makeArray),
+    // the test will fail on consecutive removals.
+    for (let i = 0; i < collection.length; i++) {
+        callback.call(collection[i], i, collection[i]);
+    }
   };
+
+  // Add makeArray mock to support the fix
+  ($ as any).makeArray = (arr: any) => [...arr];
 
   test("removes standard onload attribute", () => {
     const node = {
@@ -91,5 +99,23 @@ describe("sanitize_html_attributes", () => {
     sanitize_html_attributes($, node);
     expect(node.attributes).toHaveLength(1);
     expect(node.attributes[0].name).toBe("href");
+  });
+
+  test("handles consecutive unsafe attributes correctly (regression test for skipping bug)", () => {
+    const node = {
+      attributes: [
+        { name: "onload", value: "alert(1)" },
+        { name: "onerror", value: "alert(2)" },
+        { name: "class", value: "test" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+
+    // Ensure all unsafe attributes are removed
+    expect(node.attributes).toHaveLength(1);
+    expect(node.attributes[0].name).toBe("class");
+
+    const onerror = node.attributes.find(a => a.name === "onerror");
+    expect(onerror).toBeUndefined();
   });
 });
