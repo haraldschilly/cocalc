@@ -1,0 +1,4 @@
+## 2025-02-18 - Live Collection Iteration Vulnerability
+**Vulnerability:** XSS bypass in `sanitize_html_attributes` due to iterating over a live `NamedNodeMap` while removing attributes. Removing an attribute shifts indices, causing subsequent attributes (potentially malicious ones) to be skipped.
+**Learning:** `$.each` (and generic loops) on DOM collections like `NamedNodeMap` or `HTMLCollection` operate on live views. Modifying the collection (removing items) during index-based iteration invalidates current/next indices. Test mocks must simulate this "live" behavior (index access) rather than iterating over a static snapshot (e.g. `[...collection]`) to catch such bugs.
+**Prevention:** Always iterate over a static copy of a DOM collection when modifying it. Use `Array.from(collection)`, `[...collection]`, or `$.makeArray(collection)`.

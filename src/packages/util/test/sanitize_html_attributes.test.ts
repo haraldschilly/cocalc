@@ -13,11 +13,24 @@ describe("sanitize_html_attributes", () => {
     },
   });
 
+  // Cast to any to add the static 'makeArray' method
+  ($ as any).makeArray = (collection: any) =>
+    collection ? [...collection] : [];
+
   // Cast to any to add the static 'each' method
   ($ as any).each = (collection: any, callback: Function) => {
     if (!collection) return;
-    // Iterate over a copy to allow modification during iteration
-    [...collection].forEach((item) => callback.call(item));
+    // Simulate jQuery.each behavior on array-like objects (like NamedNodeMap)
+    // It iterates by index.
+    for (let i = 0; i < collection.length; i++) {
+      const item = collection[i];
+      // In a live collection, if an element is removed, indices shift.
+      // We rely on the fact that our mock 'node.attributes' is an array
+      // and 'removeAttr' uses splice, so this correctly simulates the bug.
+      if (item) {
+        callback.call(item, i, item);
+      }
+    }
   };
 
   test("removes standard onload attribute", () => {
@@ -91,5 +104,18 @@ describe("sanitize_html_attributes", () => {
     sanitize_html_attributes($, node);
     expect(node.attributes).toHaveLength(1);
     expect(node.attributes[0].name).toBe("href");
+  });
+
+  test("removes multiple malicious attributes even if they shift indices", () => {
+    const node = {
+      attributes: [
+        { name: "onload", value: "alert(1)" },
+        { name: "onerror", value: "alert(2)" },
+        { name: "class", value: "test" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(1);
+    expect(node.attributes[0].name).toBe("class");
   });
 });
