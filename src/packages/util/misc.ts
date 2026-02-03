@@ -2445,7 +2445,12 @@ export function obj_key_subs(obj: object, subs: { [key: string]: any }): void {
 // * packages/backend/misc_node → sanitize_html
 // * packages/frontend/misc-page    → sanitize_html
 export function sanitize_html_attributes($, node): void {
-  $.each(node.attributes, function () {
+  // We must iterate over a static copy of attributes, because removing attributes
+  // while iterating over the live node.attributes collection (which $.each does)
+  // can cause attributes to be skipped, leading to XSS vulnerabilities.
+  // See https://github.com/sagemathinc/cocalc/issues/7221
+  const attributes = $.makeArray(node.attributes);
+  $.each(attributes, function () {
     // sometimes, "this" is undefined -- #2823
     // @ts-ignore -- no implicit this
     if (this == null) {

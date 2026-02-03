@@ -16,9 +16,28 @@ describe("sanitize_html_attributes", () => {
   // Cast to any to add the static 'each' method
   ($ as any).each = (collection: any, callback: Function) => {
     if (!collection) return;
-    // Iterate over a copy to allow modification during iteration
-    [...collection].forEach((item) => callback.call(item));
+    // Iterate by index to simulate live collection behavior (like NamedNodeMap)
+    // This allows us to catch "modification during iteration" bugs
+    for (let i = 0; i < collection.length; i++) {
+      callback.call(collection[i]);
+    }
   };
+
+  ($ as any).makeArray = (arr: any) => [...arr];
+
+  test("SECURITY: prevents attribute skipping when multiple unsafe attributes are present", () => {
+    const node = {
+      attributes: [
+        { name: "onload", value: "alert(1)" },
+        { name: "onerror", value: "alert(1)" },
+        { name: "class", value: "test" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    // Should remove both unsafe attributes
+    expect(node.attributes).toHaveLength(1);
+    expect(node.attributes[0].name).toBe("class");
+  });
 
   test("removes standard onload attribute", () => {
     const node = {

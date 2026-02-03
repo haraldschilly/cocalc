@@ -1,0 +1,4 @@
+## 2025-02-27 - Modification During Iteration in DOM Sanitization
+**Vulnerability:** XSS vulnerability in `sanitize_html_attributes` where removing attributes from a live `NamedNodeMap` (via jQuery) during iteration caused subsequent attributes to be skipped.
+**Learning:** `NamedNodeMap` (accessed via `node.attributes`) is a live collection. When iterating by index (as `$.each` does), removing an item shifts indices, causing the loop to skip the next item. Mocking libraries often use Arrays (safe) which hides this behavior in tests.
+**Prevention:** Always iterate over a static copy (`$.makeArray(attributes)` or `Array.from(attributes)`) when modifying a collection, especially for security-critical sanitization logic. Ensure test mocks simulate "live" collection behavior (index-based iteration) to catch such regressions.
