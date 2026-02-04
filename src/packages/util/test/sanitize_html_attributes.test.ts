@@ -20,6 +20,11 @@ describe("sanitize_html_attributes", () => {
     [...collection].forEach((item) => callback.call(item));
   };
 
+  // Mock $.makeArray to create a static copy (simulating jQuery behavior)
+  ($ as any).makeArray = (collection: any) => {
+    return Array.from(collection || []);
+  };
+
   test("removes standard onload attribute", () => {
     const node = {
       attributes: [

@@ -1,0 +1,4 @@
+## 2025-02-18 - Live Collection Iteration Vulnerability in HTML Sanitization
+**Vulnerability:** `sanitize_html_attributes` iterated directly over `node.attributes` (a live `NamedNodeMap`). When an attribute was removed during iteration (e.g., because it was unsafe), the collection indices shifted, causing the loop to skip the immediately following attribute. This allowed attackers to bypass sanitization by placing two unsafe attributes consecutively (e.g., `<img onload="..." onerror="...">` -> `onload` removed, `onerror` skipped).
+**Learning:** Iterating over live DOM collections (like `NamedNodeMap` or `HTMLCollection`) while modifying them (removing elements) is dangerous. `$.each` does not automatically snapshot the collection if passed a live object.
+**Prevention:** Always convert live collections to a static array (snapshot) before iterating if the collection might be modified during the loop. Use `$.makeArray()`, `Array.from()`, or spread syntax `[...]`.

@@ -2445,7 +2445,7 @@ export function obj_key_subs(obj: object, subs: { [key: string]: any }): void {
 // * packages/backend/misc_node → sanitize_html
 // * packages/frontend/misc-page    → sanitize_html
 export function sanitize_html_attributes($, node): void {
-  $.each(node.attributes, function () {
+  $.each($.makeArray(node.attributes), function () {
     // sometimes, "this" is undefined -- #2823
     // @ts-ignore -- no implicit this
     if (this == null) {
