@@ -2468,6 +2468,19 @@ export function sanitize_html_attributes($, node): void {
       normalizedValue.startsWith("vbscript:")
     ) {
       $(node).removeAttr(attrName);
+      continue;
+    }
+
+    if (normalizedValue.startsWith("data:")) {
+      // Only allow data:image/ in src of <img> tags
+      const isSafeDataUri =
+        node.nodeName?.toUpperCase() === "IMG" &&
+        lowerName === "src" &&
+        normalizedValue.startsWith("data:image/");
+
+      if (!isSafeDataUri) {
+        $(node).removeAttr(attrName);
+      }
     }
   }
 }
