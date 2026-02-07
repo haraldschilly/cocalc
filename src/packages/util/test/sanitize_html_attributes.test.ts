@@ -116,4 +116,47 @@ describe("sanitize_html_attributes", () => {
     expect(node.attributes).toHaveLength(2);
     expect(node.attributes.map((a) => a.name)).toEqual(["class", "id"]);
   });
+
+  test("removes data:text/html URI", () => {
+    const node = {
+      attributes: [
+        { name: "href", value: "data:text/html,<script>alert(1)</script>" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("removes data:application/javascript URI", () => {
+    const node = {
+      attributes: [
+        { name: "href", value: "data:application/javascript,alert(1)" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("allows data:image/png URI", () => {
+    const node = {
+      attributes: [
+        {
+          name: "src",
+          value:
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",
+        },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(1);
+    expect(node.attributes?.[0].value).toContain("data:image/png");
+  });
+
+  test("removes data: URI with whitespace (normalized check)", () => {
+    const node = {
+      attributes: [{ name: "href", value: " data: text/html,<script>" }],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
 });
