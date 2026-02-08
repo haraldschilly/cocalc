@@ -1,0 +1,4 @@
+## 2025-02-18 - [HIGH] Block dangerous data: URIs in HTML sanitization
+**Vulnerability:** HTML attribute sanitization (`sanitize_html_attributes` in `src/packages/util/misc.ts`) only blocked `javascript:` and `vbscript:` protocols, allowing `data:` URIs. Attackers could use `data:text/html` or similar in `href` attributes to execute XSS (e.g., `<a href="data:text/html,<script>alert(1)</script>">`).
+**Learning:** Checking for specific dangerous protocols (`javascript:`) is insufficient as `data:` URIs can also execute code. A deny-list approach for `data:` types (or an allow-list for `data:image/`) is necessary.
+**Prevention:** Block `data:` URIs by default, only allowing safe subsets like `data:image/` for `src` attributes. Normalization (lowercasing, whitespace removal) is crucial before checking protocols.

@@ -116,4 +116,62 @@ describe("sanitize_html_attributes", () => {
     expect(node.attributes).toHaveLength(2);
     expect(node.attributes.map((a) => a.name)).toEqual(["class", "id"]);
   });
+
+  test("removes data:text/html URI", () => {
+    const node = {
+      attributes: [
+        { name: "href", value: "data:text/html,<script>alert(1)</script>" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("removes data:application/javascript URI", () => {
+    const node = {
+      attributes: [
+        { name: "href", value: "data:application/javascript,alert(1)" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("allows data:image/png URI", () => {
+    const node = {
+      attributes: [
+        {
+          name: "src",
+          value:
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+        },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(1);
+    expect(node.attributes[0].name).toBe("src");
+  });
+
+  test("allows data:image/png URI (case insensitive)", () => {
+    const node = {
+      attributes: [
+        {
+          name: "src",
+          value:
+            "data:ImAgE/PnG;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+        },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(1);
+    expect(node.attributes[0].name).toBe("src");
+  });
+
+  test("removes data: URI (default text/plain)", () => {
+    const node = {
+      attributes: [{ name: "href", value: "data:,Hello%2C%20World!" }],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
 });
