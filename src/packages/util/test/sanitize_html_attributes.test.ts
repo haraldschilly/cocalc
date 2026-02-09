@@ -116,4 +116,23 @@ describe("sanitize_html_attributes", () => {
     expect(node.attributes).toHaveLength(2);
     expect(node.attributes.map((a) => a.name)).toEqual(["class", "id"]);
   });
+
+  test("removes data: href (except image)", () => {
+    const node = {
+      attributes: [
+        { name: "href", value: "data:text/html,<script>alert(1)</script>" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("keeps data:image/ href", () => {
+    const node = {
+      attributes: [{ name: "href", value: "data:image/png;base64,..." }],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(1);
+    expect(node.attributes[0].name).toBe("href");
+  });
 });
