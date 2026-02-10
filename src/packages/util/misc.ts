@@ -2465,7 +2465,9 @@ export function sanitize_html_attributes($, node): void {
     if (
       lowerName.startsWith("on") ||
       normalizedValue.startsWith("javascript:") ||
-      normalizedValue.startsWith("vbscript:")
+      normalizedValue.startsWith("vbscript:") ||
+      (normalizedValue.startsWith("data:") &&
+        !(lowerName === "src" && normalizedValue.startsWith("data:image/")))
     ) {
       $(node).removeAttr(attrName);
     }

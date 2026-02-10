@@ -116,4 +116,46 @@ describe("sanitize_html_attributes", () => {
     expect(node.attributes).toHaveLength(2);
     expect(node.attributes.map((a) => a.name)).toEqual(["class", "id"]);
   });
+
+  // NEW TESTS START HERE
+  test("removes data: protocol in href", () => {
+    const node = {
+      attributes: [
+        { name: "href", value: "data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("removes data: protocol in object data attribute", () => {
+     const node = {
+      attributes: [
+        { name: "data", value: "data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("keeps data:image/png in src attribute", () => {
+    const node = {
+      attributes: [
+        { name: "src", value: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(1);
+    expect(node.attributes[0].name).toBe("src");
+  });
+
+  test("removes data:image/svg+xml in href attribute (unsafe if clicked)", () => {
+    const node = {
+      attributes: [
+        { name: "href", value: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4=" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
 });
