@@ -165,4 +165,56 @@ describe("sanitize_html_attributes", () => {
     sanitize_html_attributes($, node);
     expect(node.attributes).toHaveLength(0);
   });
+
+  test("removes style attribute with javascript: URL", () => {
+    const node = {
+      attributes: [
+        {
+          name: "style",
+          value: "background-image: url('javascript:alert(1)')",
+        },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("removes style attribute with vbscript: URL", () => {
+    const node = {
+      attributes: [
+        { name: "style", value: "background-image: url('vbscript:msgbox(1)')" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("removes style attribute with expression (IE legacy)", () => {
+    const node = {
+      attributes: [{ name: "style", value: "width: expression(alert(1))" }],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("keeps safe style attribute", () => {
+    const node = {
+      attributes: [
+        { name: "style", value: "color: red; background: url('img.png')" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(1);
+    expect(node.attributes[0].name).toBe("style");
+  });
+
+  test("keeps safe style attribute with 'javascript' string (not protocol)", () => {
+    const node = {
+      attributes: [
+        { name: "style", value: "font-family: 'Javascript Mono', monospace" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(1);
+  });
 });

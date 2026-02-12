@@ -2468,7 +2468,12 @@ export function sanitize_html_attributes($, node): void {
       normalizedValue.startsWith("vbscript:") ||
       // Prevent XSS via data URIs (e.g. data:text/html) while allowing legitimate images (data:image/) in src.
       (normalizedValue.startsWith("data:") &&
-        (lowerName !== "src" || !normalizedValue.startsWith("data:image/")))
+        (lowerName !== "src" || !normalizedValue.startsWith("data:image/"))) ||
+      // Prevent XSS via style attributes (e.g. background-image: url(javascript:alert(1)))
+      (lowerName === "style" &&
+        (normalizedValue.includes("javascript:") ||
+          normalizedValue.includes("vbscript:") ||
+          normalizedValue.includes("expression(")))
     ) {
       $(node).removeAttr(attrName);
     }
