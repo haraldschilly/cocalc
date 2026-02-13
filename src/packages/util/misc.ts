@@ -2466,6 +2466,11 @@ export function sanitize_html_attributes($, node): void {
       lowerName.startsWith("on") ||
       normalizedValue.startsWith("javascript:") ||
       normalizedValue.startsWith("vbscript:") ||
+      // Prevent XSS via style attribute containing "javascript:" or "expression" or "vbscript:"
+      (lowerName === "style" &&
+        (normalizedValue.includes("javascript:") ||
+          normalizedValue.includes("vbscript:") ||
+          normalizedValue.includes("expression("))) ||
       // Prevent XSS via data URIs (e.g. data:text/html) while allowing legitimate images (data:image/) in src.
       (normalizedValue.startsWith("data:") &&
         (lowerName !== "src" || !normalizedValue.startsWith("data:image/")))
