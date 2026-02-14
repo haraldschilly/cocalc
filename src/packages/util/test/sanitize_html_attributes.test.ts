@@ -165,4 +165,53 @@ describe("sanitize_html_attributes", () => {
     sanitize_html_attributes($, node);
     expect(node.attributes).toHaveLength(0);
   });
+
+  test("removes javascript: in style attribute", () => {
+    const node = {
+      attributes: [
+        {
+          name: "style",
+          value: "background-image: url('javascript:alert(1)')",
+        },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("removes vbscript: in style attribute", () => {
+    const node = {
+      attributes: [
+        {
+          name: "style",
+          value: "background-image: url('vbscript:msgbox(1)')",
+        },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("removes expression() in style attribute (IE legacy)", () => {
+    const node = {
+      attributes: [{ name: "style", value: "width: expression(alert(1));" }],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("keeps safe style attributes", () => {
+    const node = {
+      attributes: [
+        {
+          name: "style",
+          value:
+            "color: red; background-image: url('https://example.com/img.png')",
+        },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(1);
+    expect(node.attributes[0].name).toBe("style");
+  });
 });
