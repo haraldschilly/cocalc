@@ -165,4 +165,56 @@ describe("sanitize_html_attributes", () => {
     sanitize_html_attributes($, node);
     expect(node.attributes).toHaveLength(0);
   });
+
+  // Security fixes for style attributes
+  test("removes style attribute with javascript: url", () => {
+    const node = {
+      attributes: [
+        { name: "style", value: "background: url(javascript:alert(1))" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("removes style attribute with javascript: url (uppercase)", () => {
+    const node = {
+      attributes: [
+        { name: "style", value: "background: URL(JaVaScRiPt:alert(1))" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("removes style attribute with expression (IE)", () => {
+     const node = {
+      attributes: [
+        { name: "style", value: "width: expression(alert(1))" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("allows safe style attribute", () => {
+     const node = {
+      attributes: [
+        { name: "style", value: "color: red;" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(1);
+    expect(node.attributes[0].value).toBe("color: red;");
+  });
+
+  test("removes style attribute with data: url", () => {
+    const node = {
+      attributes: [
+        { name: "style", value: "background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4=)" },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
 });

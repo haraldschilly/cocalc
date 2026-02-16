@@ -2471,6 +2471,20 @@ export function sanitize_html_attributes($, node): void {
         (lowerName !== "src" || !normalizedValue.startsWith("data:image/")))
     ) {
       $(node).removeAttr(attrName);
+      continue;
+    }
+
+    // Check specifically for unsafe content in style attributes.
+    // We are extra conservative here, since style attributes can be used for XSS in many ways.
+    if (lowerName === "style") {
+      if (
+        normalizedValue.includes("javascript:") ||
+        normalizedValue.includes("vbscript:") ||
+        normalizedValue.includes("expression(") ||
+        normalizedValue.includes("data:")
+      ) {
+        $(node).removeAttr(attrName);
+      }
     }
   }
 }
