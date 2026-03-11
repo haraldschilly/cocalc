@@ -45,6 +45,27 @@ describe("sanitize_html_attributes", () => {
     expect(node.attributes).toHaveLength(0);
   });
 
+  test("removes style with javascript:", () => {
+    const node = {
+      attributes: [
+        {
+          name: "style",
+          value: "background-image: url(javascript:alert(1))",
+        },
+      ],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
+  test("removes style with expression", () => {
+    const node = {
+      attributes: [{ name: "style", value: "width: expression(alert(1))" }],
+    };
+    sanitize_html_attributes($, node);
+    expect(node.attributes).toHaveLength(0);
+  });
+
   test("keeps data:image/png src (legitimate image)", () => {
     const node = {
       attributes: [
