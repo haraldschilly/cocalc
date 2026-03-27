@@ -18,11 +18,6 @@ import { JupyterActions } from "./browser-actions";
 import { commands, KeyboardCommand } from "./commands";
 import { NotebookMode } from "@cocalc/jupyter/types";
 
-export function keyCode_to_chr(keyCode: number): string {
-  const chrCode = keyCode - 48 * Math.floor(keyCode / 48);
-  return String.fromCharCode(96 <= keyCode ? chrCode : keyCode);
-}
-
 function is_equal(e1: KeyboardCommand, e2: KeyboardCommand): boolean {
   for (const field of ["which", "ctrl", "shift", "alt", "meta"]) {
     if (e1[field] !== e2[field]) {
